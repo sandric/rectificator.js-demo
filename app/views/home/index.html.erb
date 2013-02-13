@@ -1,0 +1,33 @@
+  <h1>rectificator.js</h1>
+
+  <div style="float:left; text-align: right; padding: 10px">
+
+    <%=  simple_form_for :f do |f| %>
+
+      <%=  f.input :rectangle_x, :label => "rectangle_x", :input_html => { :value => "50" } %>
+      <%=  f.input :rectangle_y, :label => "rectangle_y", :input_html => { :value => "50" } %>
+
+      <%=  f.input :rectangle_width, :label => "rectangle_width", :input_html => { :value => "100" } %>
+      <%=  f.input :rectangle_height, :label => "rectangle_height", :input_html => { :value => "50" } %>
+
+      <%=  f.input :rectange_corner_size_x, :label => "rectange_corner_size_x", :input_html => { :value => "20" } %>
+      <%=  f.input :rectange_corner_size_y, :label => "rectange_corner_size_y", :input_html => { :value => "20" } %>
+
+
+      <%=  f.input :start_point_x, :label => "start_point_x", :input_html => { :value => "400" } %>
+      <%=  f.input :start_point_y, :label => "start_point_y", :input_html => { :value => "150" } %>
+
+      <%=  f.input :start_point_radius, :label => "start_point_radius", :input_html => { :value => "5" } %>
+
+      <%=  f.input :normal_radius, :label => "normal_radius", :input_html => { :value => "10" } %>
+
+      <%=  f.input :color, :label => "color", :input_html => { :value => "black" } %>
+      <%=  f.submit :generate %>
+
+    <% end %>
+
+  </div>
+
+  <div style="border: 1px dashed #87ceeb;">
+    <canvas id="canvas" style="width: 800px; height: 800px"></canvas>
+  </div>

@@ -26,9 +26,10 @@ class @Rectificator
     @rectangle_corner_size_x = rectange_corner_size_x
     @rectangle_corner_size_y = rectange_corner_size_y
     @start_point_radius = start_point_radius
+    @start_point_x = start_point_x
+    @start_point_y = start_point_y
 
     @normal_radius = normal_radius
-    @center = new Point(start_point_x, start_point_y)
 
   draw: ->
     @drawRectangle()
@@ -41,19 +42,25 @@ class @Rectificator
     rectangle = new Rectangle(@rectangle_x, @rectangle_y, @rectangle_width, @rectangle_height)
     cornerSize = new Size(@rectangle_corner_size_x, @rectangle_corner_size_y)
     @rectangle = new Path.RoundRectangle(rectangle, cornerSize)
-    @rectangle.strokeColor = "blue"
+    @rectangle.strokeColor = "black"
     @rectangle.fillColor = @color
 
     @rectangle._name = @id
+    @rectangle._type = "rectificator"
+
+  drawCenterCircle: ->
+    @center = new Point(@start_point_x, @start_point_y)
+    @circle = new Path.Circle(@center, @start_point_radius)
+    @circle.fillColor = @color
+    @circle.strokeColor = "red"
+
+    @circle._name = @id
+    @circle._type = "rectificator_circle"
 
   drawPointer: ->
     @drawConnection()
     @drawNormalVector()
     @drawNormalVectorConnection()
-
-  drawCenterCircle: ->
-    @circle = new Path.Circle(@center, @start_point_radius)
-    @circle.fillColor = @color
 
   drawConnection: ->
     @connection = new Path()
@@ -77,6 +84,8 @@ class @Rectificator
     @normalVector.remove()
     @connection.remove()
 
+    # pixel offset for adding more segments to rectangle
+    # for more accurance of determining intersection of rectangle with pointer - set less value
     @rectangle.flatten(5)
 
     intersections = []
@@ -97,19 +106,20 @@ class @Rectificator
     @rectangle.insert(segmentIndexOne + 1, @center)
     @rectangle.insert(segmentIndexOne + 2, intersections[1])
 
-    new Path.Circle(@rectangle.segments[segmentIndexOne + 1].point, 3)
-
   moveRectangleTo: (delta) ->
     @rectangle.remove()
+    @circle.remove()
 
     @rectangle_x += delta.x
     @rectangle_y += delta.y
 
     @draw()
 
-  groupify: ->
-    @group = new Group([@rectangle, @connection, @normalVector, @circle])
+  moveCenterTo: (delta) ->
+    @rectangle.remove()
+    @circle.remove()
 
-  removeGroup: ->
-    @group.remove()
+    @start_point_x += delta.x
+    @start_point_y += delta.y
 
+    @draw()

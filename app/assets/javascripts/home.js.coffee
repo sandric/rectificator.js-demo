@@ -5,9 +5,7 @@
 
 $(document).ready ->
 
-
-  rectificators = []
-
+  window.rectificators = []
 
   createRectificator = (params) ->
     new Rectificator( parseInt(params.id),
@@ -30,10 +28,6 @@ $(document).ready ->
                       params.color)
 
   $(".simple_form").on "submit", () ->
-    console.log "submitting!"
-
-    #$("#canvas")[0].getContext('2d').clearRect(0, 0, 800, 800)
-    #project.activeLayer.removeChildren();
 
     rectificators.push createRectificator(
 
@@ -60,68 +54,41 @@ $(document).ready ->
 
     )
 
-    rectificators[0].draw()
-
+    rectificators[rectificators.length - 1].draw()
     false
 
   hitOptions =
-    segments: true,
-    stroke: true,
-    fill: true,
-    tolerance: 5
+    fill: true
 
-  tool.onMouseDrag = (event) ->
+  itemIsRectificator = (hitResult) ->
+    if hitResult.item['_type'] == 'rectificator'
+      hitResult.item
+    else
+      undefined
 
+  itemIsRectificatorCircle = (hitResult) ->
+    if hitResult.item['_type'] != 'rectificator'
+      if hitResult.item['_type'] == 'rectificator_circle'
+        hitResult.item
+      else if hitResult.item.parent.children
+        for item in hitResult.item.parent.children
+          if item['_type'] == 'rectificator_circle'
+            return item
+    else
+      undefined
+
+  tool.onMouseDown = (event) ->
     hitResult = project.hitTest(event.point, hitOptions)
-    project.activeLayer.selected = false
 
-    window.hit = hitResult
+    window.selected_item = window.selected_item || itemIsRectificator(hitResult)
+    window.selected_item = window.selected_item || itemIsRectificatorCircle(hitResult)
 
-    if hitResult && hitResult.item && hitResult.item['_name']
-
-      console.log hitResult._name
-
-      hitResult.item.selected = true
-
-      $("#canvas")[0].getContext('2d').clearRect(0, 0, 800, 800)
-      project.activeLayer.removeChildren()
-
-      createRectificator(
-
-        id: rectificators.length
-
-        rectangle_x: event["event"].offsetX
-        rectangle_y: event["event"].offsetY
-
-        rectangle_width: $("#f_rectangle_width").val()
-        rectangle_height: $("#f_rectangle_height").val()
-
-        rectange_corner_size_x: $("#f_rectange_corner_size_x").val()
-        rectange_corner_size_y: $("#f_rectange_corner_size_y").val()
-
-
-        start_point_x: $("#f_start_point_x").val()
-        start_point_y: $("#f_start_point_y").val()
-
-        start_point_radius: $("#f_start_point_radius").val()
-
-        normal_radius: $("#f_normal_radius").val()
-
-        color: $("#f_color").val()
-
-      ).draw()
-
-  ###
-  hitOptions =
-    segments: true,
-    stroke: true,
-    fill: true,
-    tolerance: 5
+  tool.onMouseUp = (event) ->
+    delete window.selected_item
 
   tool.onMouseMove = (event) ->
-    hitResult = project.hitTest(event.point, hitOptions)
-    project.activeLayer.selected = false
-    if hitResult && hitResult.item
-      console.log hitResult.item
-      hitResult.item.selected = true
-  ###
+    if window.selected_item != undefined
+      if window.selected_item['_type'] == 'rectificator'
+        rectificators[window.selected_item['_name']].moveRectangleTo(event.delta)
+      else if window.selected_item['_type'] == 'rectificator_circle'
+        rectificators[window.selected_item['_name']].moveCenterTo(event.delta)
